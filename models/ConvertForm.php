@@ -24,42 +24,57 @@ class ConvertForm extends Model
     {
         return [
             [['fromCourse','toCourse','val'], 'required'],
+            ['fromCourse', 'string','length' => 3],
+            ['toCourse', 'string','length' => 3],
+            ['val','number']
         ];
     }
 
-
-    
     public function convert():bool|float
     {
         if ($this->fromCourse
             && $this->toCourse 
             && $this->fromCourse != $this->toCourse
-        ) 
-        {
-            if($this->fromCourse == "RUB"){
-                $inRub = $this->val;
-                $from = 1;
-            } else {
-                $from = Course::findOne(['char_code'=>$this->fromCourse]);
-                $inRub = $from->vunit_rate*$this->val;
+        ) {
+            $from = false;
+            $to = false;
+            $this->setFromTo($from,$to);
+            if($from && $to) {
+                $res = $this->val * $from/$to; //formula for convert valutes
+                return round($res,2);
             }
-                
-            if ($from && $this->toCourse=="RUB") 
-            {
-                return round($inRub,2);
-            } else {
-                $to = Course::findOne(['char_code'=>$this->toCourse]);
-            
-                if ($to) {
-                    $res = ($to->vunit_rate > 1)?$inRub / $to->vunit_rate : $inRub / round(1/$to->vunit_rate,2);
-                    return round($res,2);
-                } 
-                
-            }
-            return false;
-        
         }
         return false;
+    }
+
+    /**
+     * Setting variables "from" and "to"
+     * @param float|bool $from
+     * @param float|bool $to
+     */
+    private function setFromTo(&$from,&$to)
+    {
+        /**
+         * if we convert value from rubls or to
+         * then we shoould set value for rubls 1 or val value for 
+         * correct work of formula
+         */
+        if($this->fromCourse == "RUB" || $this->toCourse == "RUB"){
+            if($this->fromCourse == "RUB"){
+                $from = $this->val;
+                $to = Course::findOne(['char_code'=>$this->toCourse]);
+                $to = ($to)?$to->vunit_rate:false;
+            } else {
+                $to = 1;
+                $from = Course::findOne(['char_code'=>$this->fromCourse]);
+                $from = ($from)?$from->vunit_rate:false;
+            }
+        } else {
+            $from = Course::findOne(['char_code'=>$this->fromCourse]);
+            $to = Course::findOne(['char_code'=>$this->toCourse]);
+            $from = ($from)?$from->vunit_rate:false;
+            $to = ($to)?$to->vunit_rate:false;
+        }
     }
     
 }

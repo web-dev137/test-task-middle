@@ -34,5 +34,13 @@ class ConvertController extends Controller
         $m->updateCourses();
         return ExitCode::OK;
     }
+
+    public function actionInitCourse()
+    {
+        $m = new Course();
+
+        $m->initCourses();
+        return ExitCode::OK;
+    }
 }
 

@@ -3,18 +3,18 @@
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `{{%course}}`.
+ * Handles the creation of table `{{%valute}}`.
  */
-class m231028_090615_create_course_table extends Migration
+class m231107_164815_create_valute_table extends Migration
 {
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        $this->createTable('{{%course}}', [
+        $this->createTable('{{%valute}}', [
             'char_code' => $this->string()->notNull()->append("PRIMARY KEY"),
-            'vunit_rate' => $this->float()
+            'name_valute' => $this->string()->notNull()
         ]);
     }
 
@@ -23,6 +23,6 @@ class m231028_090615_create_course_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%course}}');
+        $this->dropTable('{{%valute}}');
     }
 }
