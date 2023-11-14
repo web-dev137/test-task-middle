@@ -47,15 +47,15 @@ class Course extends ActiveRecord
      */
     private function parseXml():\SimpleXMLElement|bool
     {
-        $xml = $this->checkConnect($hasError);
-        if(!$hasError){
+        $xml = $this->checkConnect();
+        if($xml instanceof ResponseInterface){
             $body = $xml->getBody();
             $xml = simplexml_load_string($body);
-            $valutes = ($xml)?$xml->Valute:false;
+            $currencies = ($xml)?$xml->Valute:false;
         } else {
-            $valutes = false;
+            $currencies = false;
         }
-        return $valutes;
+        return $currencies;
     }
 
     /**
@@ -63,19 +63,23 @@ class Course extends ActiveRecord
      */
     public function updateCourses() 
     {
-        $valutes = $this->parseXml();
-        $fillCourses = []; //data for insert/update into course table
-        $fillValutes = []; //data for insert/update into valute table
-        if($valutes) {
-            foreach ($valutes as $valute) {
+        $currencies = $this->parseXml();
+        if($currencies) {
+            foreach ($currencies as $valute) {
 
                 $courseString = str_replace(
                     ',','.',$valute->VunitRate->__toString()
                 );
+                /*
+                 * data for insert/update into course table
+                */
                 $fillCourses = [
                     'char_code' => $valute->CharCode->__toString(),//уникальное поле
                     'vunit_rate' => (double)$courseString
                 ];
+                /*
+                 * data for insert/update into valute table
+                */
                 $fillValutes = [
                     'char_code' => $valute->CharCode->__toString(),//уникальное поле
                     'name_valute' => $valute->Name->__toString()
@@ -84,8 +88,10 @@ class Course extends ActiveRecord
                 Yii::$app->db->createCommand()->upsert(Valute::tableName(),$fillValutes,$fillValutes)->execute();   
             }
             echo "success";
+            return true;
         }
-       echo "Can not parse";
+        echo "Can not parse";
+        return  false;
     }
 
     /**
@@ -93,14 +99,14 @@ class Course extends ActiveRecord
      * @param bool $hasError
      * @return ResponseInterface
      */
-    private function checkConnect(&$hasError):ResponseInterface
+    private function checkConnect():ResponseInterface|bool
     {
-        $hasError = false;
+
         $client = new Client();
         try {
             $res = $client->request('GET',self::URL_RUB);
         } catch (ClientException $e) {
-            $hasError = true;
+            $res = false;
             $response = $e->getResponse();
             switch ($response->getStatusCode()) {
                 case 403:

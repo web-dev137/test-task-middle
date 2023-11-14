@@ -14,13 +14,14 @@
     },
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.1.0",
         "yiisoft/yii2": "~2.0.45",
         "yiisoft/yii2-bootstrap5": "~2.0.2",
         "yiisoft/yii2-symfonymailer": "~2.0.3",
         "guzzlehttp/guzzle": "^7.8",
         "phpquery/phpquery": "^0.0.4",
-        "keltstr/yii2-simplehtmldom": "dev-master"
+        "keltstr/yii2-simplehtmldom": "dev-master",
+      "ext-simplexml": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
